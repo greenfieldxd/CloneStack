@@ -6,38 +6,73 @@ using UnityEngine.UI;
 
 public class Stack : MonoBehaviour
 {
-    public GameObject tile;
-    public Text scoreText;
+    private const float bound_size = 10f; 
 
-    public Transform startPositionTile;
+    public GameObject[] stack;
 
-    GameObject lastTile;
-    GameObject currentTile;
+    int stackIndex;
+    int scoreCount = 0;
+
+    float tileTransition = 0f;
+    float tileSpeed = 2f;
+
 
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(createTileAndMove());
-    }
+        stack = new GameObject[transform.childCount];
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-    IEnumerator createTileAndMove()
-    {
-        currentTile = Instantiate(tile, startPositionTile.position, Quaternion.identity);
-
-        while (true)
+        for (int i = 0; i < transform.childCount; i++)
         {
-            currentTile.transform.DOMoveX(currentTile.transform.position.x + 60, 15f);
-            yield return new WaitForSeconds(5f);
-            currentTile.transform.DOMoveX(currentTile.transform.position.x - 60, 15f);
-            yield return new WaitForSeconds(5f);
-
+            stack[i] = transform.GetChild(i).gameObject;
         }
+            stackIndex = transform.childCount - 1;
     }
+
+    public void Click()
+    {
+        if (PlaceTile())
+        {
+            SpawnTile();
+            scoreCount++;
+        }
+        else
+        {
+            GameOver();
+        }
+
+        MoveTile();
+    }
+
+    private void MoveTile()
+    {
+
+    }
+
+    private void SpawnTile()
+    {
+        stackIndex--;
+        if (stackIndex < 0)
+        {
+            stackIndex = transform.childCount - 1;
+        }
+
+        stack[stackIndex].transform.localPosition = new Vector3(0, scoreCount, 0);
+    }
+
+    private bool PlaceTile()
+    {
+        return true;
+    }
+
+    private void GameOver()
+    {
+
+    }
+
+
+  
+
+
+    
 }
