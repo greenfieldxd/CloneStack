@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class Stack : MonoBehaviour
 {
-    private const float bound_size = 12f;
+    private const float bound_size = 11f;
     private const float stack_moving_speed = 3f;
     private const float error_margin = 0.1f;
 
