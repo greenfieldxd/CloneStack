@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class Stack : MonoBehaviour
 {
-    private const float bound_size = 11f;
+    private const float bound_size = 10f;
     private const float stack_moving_speed = 3f;
     private const float error_margin = 0.1f;
 
@@ -22,6 +22,7 @@ public class Stack : MonoBehaviour
     float secondaryPos;
 
     bool movingOnX = true;
+    bool gameOver = false;
 
     Vector3 desiredPos;
     Vector3 lastTilePos;
@@ -63,6 +64,11 @@ public class Stack : MonoBehaviour
 
     private void MoveTile()
     {
+        if (gameOver)
+        {
+            return;
+        }
+
         tileTransition += Time.deltaTime * tileSpeed;
         if (movingOnX)
         {
@@ -88,6 +94,7 @@ public class Stack : MonoBehaviour
 
         desiredPos = (Vector3.down) * scoreCount;
         stack[stackIndex].transform.localPosition = new Vector3(0, scoreCount, 0);
+        stack[stackIndex].transform.localScale = new Vector3(stackBounds.x, 1, stackBounds.y);
     }
 
     private bool PlaceTile()
@@ -108,13 +115,47 @@ public class Stack : MonoBehaviour
                 {
                     return false;
                 }
+
+                float middle = lastTilePos.x + transform.position.x / 2;
+                transform.localScale = new Vector3(stackBounds.x, 1, stackBounds.y);
+                transform.localPosition = new Vector3(middle - (lastTilePos.x / 2), scoreCount, lastTilePos.z);
+            }
+            else
+            {
+                combo++;
+                transform.localPosition = lastTilePos + Vector3.up;
             }
         }
+        else
+        {
+            float deltaZ = lastTilePos.z - transform.position.z;
+
+            if (Mathf.Abs(deltaZ) > error_margin)
+            {
+                //cut the tile
+                combo = 0;
+                stackBounds.y = Mathf.Abs(deltaZ);
+                if (stackBounds.y <= 0)
+                {
+                    return false;
+                }
+
+                float middle = lastTilePos.z + transform.position.z / 2;
+                transform.localScale = new Vector3(stackBounds.x, 1, stackBounds.y);
+                transform.localPosition = new Vector3(lastTilePos.x, scoreCount, middle - (lastTilePos.z / 2));
+            }
+            else
+            {
+                combo++;
+                transform.localPosition = lastTilePos + Vector3.up;
+            }
+         
+        }
+
 
         if (movingOnX)
         {
             secondaryPos = transform.localPosition.x;
-
         }
         else
         {
@@ -124,11 +165,14 @@ public class Stack : MonoBehaviour
         movingOnX = !movingOnX;
 
         return true;
-    }
+}
+    
 
     private void GameOver()
     {
-        //Game over
+        Debug.Log("Lose");
+        gameOver = true;
+        stack[stackIndex].AddComponent<Rigidbody>();
     }
 
 
