@@ -6,19 +6,26 @@ using UnityEngine.UI;
 
 public class Stack : MonoBehaviour
 {
+    [SerializeField] GameObject[] stack;
+    [SerializeField] Text scoreText;
+    [SerializeField] RestartPanel restartPanel;
+    [SerializeField] Color[] colorsTile;
+    [SerializeField] AudioSource audioSource;
+
+
     private const float bound_size = 10f;
     private const float stack_moving_speed = 3f;
     private const float error_margin = 0.1f;
 
-    public GameObject[] stack;
+
     Vector2 stackBounds = new Vector2(bound_size, bound_size);
 
     int stackIndex;
     int scoreCount = 0;
-    int combo = 0;
+    int colorIndex = 0;
 
     float tileTransition = 0f;
-    float tileSpeed = 1.2f;
+    float tileSpeed = 2f;
     float secondaryPos;
 
     bool movingOnX = true;
@@ -27,11 +34,14 @@ public class Stack : MonoBehaviour
     Vector3 desiredPos;
     Vector3 lastTilePos;
 
+    
 
-    // Start is called before the first frame update
+
+    
     void Start()
     {
         stack = new GameObject[transform.childCount];
+        scoreText.text = "Score: " + scoreCount;
 
         for (int i = 0; i < transform.childCount; i++)
         {
@@ -52,7 +62,11 @@ public class Stack : MonoBehaviour
         if (PlaceTile())
         {
             SpawnTile();
+            audioSource.Play();
+            SetColorTile();
             scoreCount++;
+            scoreText.text = "Score: " + scoreCount;
+
         }
         else
         {
@@ -109,8 +123,7 @@ public class Stack : MonoBehaviour
             if (Mathf.Abs(deltaX) > error_margin)
             {
                 //cut the tile
-                combo = 0;
-                stackBounds.x = Mathf.Abs(deltaX);
+                stackBounds.x -= Mathf.Abs(deltaX);
                 if (stackBounds.x <= 0)
                 {
                     return false;
@@ -122,7 +135,6 @@ public class Stack : MonoBehaviour
             }
             else
             {
-                combo++;
                 transform.localPosition = lastTilePos + Vector3.up;
             }
         }
@@ -133,8 +145,7 @@ public class Stack : MonoBehaviour
             if (Mathf.Abs(deltaZ) > error_margin)
             {
                 //cut the tile
-                combo = 0;
-                stackBounds.y = Mathf.Abs(deltaZ);
+                stackBounds.y -= Mathf.Abs(deltaZ);
                 if (stackBounds.y <= 0)
                 {
                     return false;
@@ -146,7 +157,6 @@ public class Stack : MonoBehaviour
             }
             else
             {
-                combo++;
                 transform.localPosition = lastTilePos + Vector3.up;
             }
          
@@ -167,13 +177,31 @@ public class Stack : MonoBehaviour
         return true;
 }
     
+    private void SetColorTile()
+    {
+        Renderer tileRenderer = stack[stackIndex].GetComponent<Renderer>();
+        tileRenderer.material.color = colorsTile[colorIndex];
+
+        if (colorIndex == colorsTile.Length - 1)
+        {
+            colorIndex = 0;
+        }
+        else
+        {
+            colorIndex++;
+        }
+    }
 
     private void GameOver()
     {
-        Debug.Log("Lose");
+        restartPanel.gameObject.SetActive(true);
+        restartPanel.ShowScore(scoreCount);
+        scoreText.enabled = false;
+        
         gameOver = true;
         stack[stackIndex].AddComponent<Rigidbody>();
     }
+
 
 
   
